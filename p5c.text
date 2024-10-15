@@ -1,0 +1,68 @@
+index.html
+
+<html><body>
+<a href="setDemo.jsp"> SetDemo</a>
+<a href="Maxif.html"> MaxIF</a>
+<a href="forEachDemo.jsp"> ForEachDemo</a>
+<a href="outDemo.jsp"> OutDemo</a>
+<a href="URLDemo.jsp"> URLDemo</a>
+<a href="choose_when_otherwise.jsp"> choose_when_otherwise</a>
+</body></html>
+
+setDemo.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+<c:set var="pageTitle" scope="application"
+value="Dukes Soccer League: Registration" />
+${pageTitle}
+Maxif.html
+<form action ="IFDemo.jsp">
+ x=<input type="text" name="x" /><br>
+ y=<input type="text" name="y" /><br>
+ <input type="submit" value="Check Max" />
+ </form>
+
+IFDemo.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="x" value="${param.x}"/>
+<c:set var="y" value="${param.y}"/>
+<c:if test="${x>y}">
+ <font color="blue"><h2>The Ans is:</h2></font>
+ <c:out value="${x} is greater than ${y}"/>
+</c:if>
+
+ForeachDemo.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:forEach begin="1" end="10" var="i">
+ The Square of <c:out value=" ${i}=${i*i}"/><br>
+ </c:forEach>
+
+outDemo.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="name" value="John"/>
+My name is: <c:out value= "${name}" />
+
+URLDemo.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:url value="/index.html"/>
+
+choose_when_otherwise.jsp
+
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="income" value="${4000*4}"/>
+Your Income is: <c:out value="${income}"/>
+<c:choose>
+ <c:when test="${income <=1000}">
+Income is not good
+ </c:when>
+ <c:when test="${income > 10000}">
+ Income is Very Good
+ </c:when>
+ <c:otherwise>
+ Income is undetermined
+ </c:otherwise>
+</c:choose>

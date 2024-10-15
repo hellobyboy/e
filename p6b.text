@@ -1,0 +1,129 @@
+Index.html
+<html>
+ <head>
+ <title>Room Reservation</title>
+ </head>
+ <body>
+ <form method="post" action="RoomClient">
+ <br> No of Rooms <input type=text name="t1">
+ <br> <input type="submit" name="btn" value="CheckIN">
+ <br> <input type="submit" name="btn" value="CheckOUT">
+ </form>
+ </body>
+</html>
+Step2: Create a session bean named as RoomBean in the package named ejb. Select
+the option Stateless and click on Local Interface.
+Here you will find two files created in the ejb package named as RoomBean.java and
+RoomBeanLocal.java
+RoomBeanLocal.java
+package ejb;
+import javax.ejb.Local;
+@Local
+public interface RoomBeanLocal {
+ public int checkin(int no);
+ public int checkout(int no);
+}
+RoomBean.java
+package ejb;
+import javax.ejb.Stateless;
+import java.sql.*;
+@Stateless
+public class RoomBean implements RoomBeanLocal {
+public int checkin(int no) {
+ try
+ {
+ Class.forName("com.mysql.jdbc.Driver");
+ Connection
+con=DriverManager.getConnection("jdbc:mysql://localhost/roomdb","root","tiger");
+ String sql1 = "select * from room";
+ Statement st=con.createStatement();
+ ResultSet rs=st.executeQuery(sql1);
+ rs.next();
+ int total=rs.getInt(1);
+ int occ=rs.getInt(2);
+ int free=total-occ;
+ System.out.println(total);
+ System.out.println(free);
+ if (free>=no)
+ {
+ String sql2="update room set occ=?";
+ PreparedStatement ps=con.prepareStatement(sql2);
+ ps.setInt(1, occ+no);
+int res=ps.executeUpdate();
+ return res;
+ }
+ else return 0;
+ }
+ catch(Exception e)
+ {
+ return 0;
+ }
+ }
+ public int checkout(int no) {
+ try
+ { Class.forName("com.mysql.jdbc.Driver");
+ Connection
+con=DriverManager.getConnection("jdbc:mysql://localhost/roomdb","root","tiger");
+ String sql1 = "select * from room";
+ Statement st=con.createStatement();
+ ResultSet rs=st.executeQuery(sql1);
+ rs.next();
+ int total=rs.getInt(1);
+ int occ=rs.getInt(2);
+ if (occ>=no)
+ {
+ String sql2="update room set occ=?";
+ PreparedStatement ps=con.prepareStatement(sql2);
+ ps.setInt(1, occ-no); 
+int res=ps.executeUpdate();
+ return res;
+ }
+ else return 0;
+ }
+ catch(Exception e)
+ {
+ return 0;
+ }
+ }
+}
+Step 3: Create a Servlet file named as RoomClient. Do not click on web.xml
+(Deployment Descriptor)
+package servlet;
+import ejb.RoomBeanLocal;
+import java.io.*;
+import javax.ejb.EJB;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
+@WebServlet(name = "roomclient", urlPatterns = {"/roomclient"})
+public class roomclient extends HttpServlet {
+ @EJB RoomBeanLocal obj;
+ protected void doPost(HttpServletRequest request, HttpServletResponse response)
+ throws ServletException, IOException {
+ response.setContentType("text/html");
+ PrintWriter out = response.getWriter();
+ try {
+ int no=Integer.parseInt(request.getParameter("t1"));
+String b=request.getParameter("btn");
+ int res=0;
+ if(b.equals("CheckIN"))
+ {
+ res=obj.checkin(no);
+ if (res==1)
+ out.println(no + " rooms check-in");
+ }
+ if(b.equals("CheckOUT"))
+ {
+ res=obj.checkout(no);
+ if (res==1)
+ out.println(no + " rooms check-out");
+ }
+ if(res==0)
+ out.println("Not possible to do Check IN / OUT");
+ out.println("<br><br><a href=index.html> Back </a>");
+ }
+ finally {
+ out.close();
+ }
+ }
+}
