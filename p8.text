@@ -1,0 +1,126 @@
+index.html:
+
+
+<!DOCTYPE html>
+<html>
+    <body style="background-color: pink;">
+        Sign the Guest Book
+        <form action="GuestBookView.jsp" method="post">
+            Visitor Name: <input name="guest" maxlength="25" size="50" />
+            Message: <textarea rows="5" cols="36" name="message"></textarea>
+            <input type="submit" name="btnSubmit" value="Submit" />
+        </form>
+    </body>
+</html>
+
+
+Create a simple Java Class file.
+GuestBook.java:
+
+
+package asif;
+import javax.persistence.*;
+@Entity
+@Table(name = "GuestBook")
+public class GuestBook {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "VisitorNo", unique = true, updatable = false)
+    private Integer visitorNo;
+    @Column(name = "VisitorName")
+    private String visitorName;
+    @Column(name = "Message")
+    private String message;
+    @Column(name = "MessageDate")
+    private String messageDate;
+    public GuestBook() {
+    }
+    public Integer getVisitorNo() {
+        return visitorNo;
+    }
+    public void setVisitorNo(Integer visitorNo) {
+        this.visitorNo = visitorNo;
+    }
+    public String getVisitorName() {
+        return visitorName;
+    }
+    public void setVisitorName(String visitorName) {
+        this.visitorName = visitorName;
+    }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
+    }
+    public String getMessageDate() {
+        return messageDate;
+    }
+    public void setMessageDate(String messageDate) {
+        this.messageDate = messageDate;
+    }
+}
+
+
+
+GuestBookView.jsp:
+
+
+<%@page import="java.util.*,javax.persistence.*,asif.GuestBook" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<%!
+    private EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
+    private EntityTransaction entityTransaction;
+    List<GuestBook> guestbook;
+%>
+<%
+    entityManagerFactory = Persistence.createEntityManagerFactory("prac8bPU");
+    entityManager = entityManagerFactory.createEntityManager();
+    String submit = request.getParameter("btnSubmit");
+    if (submit != null && ("Submit").equals(submit)) {
+        try {
+            String guest = request.getParameter("guest");
+            String message = request.getParameter("message");
+            String messageDate = new java.util.Date().toString();
+            GuestBook gb = new GuestBook();
+            gb.setVisitorName(guest);
+            gb.setMessage(message);
+            gb.setMessageDate(messageDate);
+            entityTransaction = entityManager.getTransaction();
+            entityTransaction.begin();
+            entityManager.persist(gb);
+            entityTransaction.commit();
+        } catch (RuntimeException e) {
+            if (entityTransaction != null) {
+                entityTransaction.rollback();
+            }
+            throw e;
+        }
+        response.sendRedirect("GuestBookView.jsp");
+    }
+    try {
+        guestbook = entityManager.createQuery("SELECT g from GuestBook g").getResultList();
+    } catch (RuntimeException e) {
+    }
+    entityManager.close();
+%>
+<html>
+    <body>
+        View the Guest Book <b>Click <a href="index.html"> here</a> to sign the guestbook.</b>
+        <hr />
+        <%
+            Iterator iterator = guestbook.iterator();
+            while (iterator.hasNext()) {
+                GuestBook obj = (GuestBook) iterator.next();
+        %>
+        On <%= obj.getMessageDate()%>,<br />
+        <b><%= obj.getVisitorName()%>:</b>
+        <%= obj.getMessage()%>
+        <br /><br />
+        <%
+            }
+        %>
+    </body>
+</html>
